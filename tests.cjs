@@ -1,0 +1,32 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
+const path = require('node:path');
+const root = __dirname;
+const context = {window:{},Intl,Date};
+vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'content.js'),'utf8'),context);
+const content=context.window.SITE_CONTENT;
+context.content=content;
+const source=fs.readFileSync(path.join(root,'script.js'),'utf8');
+const calendar=source.slice(source.indexOf('const zoneFormatter='),source.indexOf('// Exposed'));
+vm.runInContext(calendar+'\nthis.elapsedForTest=elapsed;',context);
+const elapsed=(since,now)=>JSON.parse(JSON.stringify(context.elapsedForTest(since,new Date(now))));
+assert.deepEqual(elapsed('2026-09-15','2026-11-15T04:00:00Z'),{years:0,months:2,days:0,hours:0,minutes:0,seconds:0});
+assert.deepEqual(elapsed('2025-09-29','2026-11-15T04:00:00Z'),{years:1,months:1,days:17,hours:0,minutes:0,seconds:0});
+assert.deepEqual(elapsed('2026-09-15','2026-11-15T03:59:59Z'),{years:0,months:1,days:30,hours:23,minutes:59,seconds:59});
+assert.deepEqual(elapsed('2024-01-31','2024-02-29T04:00:00Z'),{years:0,months:1,days:0,hours:0,minutes:0,seconds:0});
+assert.deepEqual(elapsed('2024-02-29','2025-02-28T04:00:00Z'),{years:1,months:0,days:0,hours:0,minutes:0,seconds:0});
+assert.equal(elapsed('2026-09-15','2026-09-14T04:00:00Z').days,0);
+const normalizer=source.match(/let value=\$\('#date-input'\)\.value\.replace\(\/\\D\/g,''\);\s*if\(value.length===6\)value=value.slice\(0,4\)\+'20'\+value.slice\(4\);/)[0];
+function normalize(input){return new Function('$',normalizer+'return value;')(()=>({value:input}));}
+for(const input of ['29/09/2025','29092025','29-09-2025','290925'])assert.equal(crypto.createHash('sha256').update(normalize(input)).digest('hex'),content.passwordHash);
+assert.notEqual(crypto.createHash('sha256').update(normalize('01012000')).digest('hex'),content.passwordHash);
+assert.equal(content.moments.length,8);
+assert.equal(content.moments[7].fotos.length,0);
+for(const m of content.moments)for(const p of m.fotos){assert.ok(fs.existsSync(path.join(root,p.src)));assert.ok(p.alt&&p.width&&p.height);}
+assert.ok(fs.existsSync(path.join(root,content.music.src)));
+const fonts=fs.readFileSync(path.join(root,'fonts.css'),'utf8');
+for(const match of fonts.matchAll(/url\(([^)]+)\)/g))assert.ok(fs.existsSync(path.join(root,match[1])));
+console.log('OK: calendar boundaries, timezone, leap year, 4 password formats, wrong password, 7 photos, text-only finale, audio and font files.');
