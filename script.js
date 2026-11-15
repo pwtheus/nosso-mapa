@@ -10,12 +10,12 @@
   soundtrack.volume = content.music.volume;
   function musicState() {
     $('#music-label').textContent = soundtrack.paused ? 'tocar música' : 'pausar música';
-    $('#music-toggle').setAttribute('aria-label', `${soundtrack.paused ? 'Tocar' : 'Pausar'} ${content.music.title}`);
+    $('#music-toggle').setAttribute('aria-label', `${soundtrack.paused ? 'tocar' : 'pausar'} ${content.music.title}`);
     $('#music-toggle').setAttribute('aria-pressed', String(!soundtrack.paused));
   }
   function playMusic() {
     $('#music-status').textContent = '';
-    soundtrack.play().catch(() => { $('#music-status').textContent = 'Toque em ♫ para tentar novamente.'; musicState(); });
+    soundtrack.play().catch(() => { $('#music-status').textContent = 'toque em ♫ para tentar novamente.'; musicState(); });
   }
   $('#begin-story').addEventListener('click', () => { if (soundtrack.paused) playMusic(); });
   $('#music-toggle').addEventListener('click', () => { if (soundtrack.paused) playMusic(); else soundtrack.pause(); });
@@ -30,7 +30,7 @@
     const cards = moment.fotos.map((photo, i) => {
       const figure = make('figure', 'photo-card');
       const button = make('button', 'photo-toggle'); button.type = 'button';
-      button.setAttribute('aria-label', moment.fotos.length > 1 && moment.fotos.length <= 4 ? 'Espalhar ou recolher as fotos de ' + moment.titulo : 'Inclinar a foto de ' + moment.titulo);
+      button.setAttribute('aria-label', moment.fotos.length > 1 && moment.fotos.length <= 4 ? 'espalhar ou recolher as fotos de ' + moment.titulo : 'inclinar a foto de ' + moment.titulo);
       const img = make('img'); img.src = photo.src; img.alt = photo.alt || moment.legenda;
       img.width = photo.width || 1200; img.height = photo.height || 900; img.loading = 'lazy'; img.decoding = 'async';
       button.append(img); figure.append(button, make('figcaption', '', `lembrança ${String(moment.id).padStart(2,'0')}${moment.fotos.length > 1 ? ' · ' + (i+1) : ''}`));
@@ -47,7 +47,7 @@
       let index = 0, startX = 0, startY = 0;
       const controls = make('div', 'gallery-controls');
       const prev = make('button', '', '←'), next = make('button', '', '→'), status = make('span');
-      prev.type = next.type = 'button'; prev.setAttribute('aria-label','Foto anterior'); next.setAttribute('aria-label','Próxima foto'); status.setAttribute('aria-live','polite');
+      prev.type = next.type = 'button'; prev.setAttribute('aria-label','foto anterior'); next.setAttribute('aria-label','próxima foto'); status.setAttribute('aria-live','polite');
       function show(delta) { index = (index + delta + cards.length) % cards.length; cards.forEach((card,i) => { card.style.display = i === index ? 'block' : 'none'; }); status.textContent = `${index+1} / ${cards.length}`; }
       prev.addEventListener('click',()=>show(-1)); next.addEventListener('click',()=>show(1));
       area.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;startY=e.changedTouches[0].clientY;},{passive:true});
@@ -149,6 +149,6 @@
           document.querySelectorAll('.moment,.finale').forEach(s=>observer.observe(s));
         },reduced.matches?0:650);
       },delay);
-    } catch {$('#password-error').textContent='Abra pelo link do site ou por localhost para continuar.';}
+    } catch {$('#password-error').textContent='abra pelo link do site ou por localhost para continuar.';}
   });
 })();
