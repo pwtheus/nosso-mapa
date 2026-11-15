@@ -67,6 +67,7 @@
     const copy=make('div','moment-copy'); copy.append(make('p','chapter-label',`${String(moment.id).padStart(2,'0')} / ${moment.ato===1?'os primeiros passos':'o nosso caminho'}`));
     const title=make('h2','',moment.titulo);title.id='title-'+moment.id;copy.append(title);
     if(moment.data){const time=make('time','',dateLabel(moment.data));time.dateTime=moment.data;copy.append(time);}
+    if(moment.datas)moment.datas.forEach(item=>{const line=make('p');line.style.margin='6px 0';const time=make('time','',`${item.rotulo} · ${dateLabel(item.data)}`);time.dateTime=item.data;line.append(time);copy.append(line);});
     copy.append(make('p','handwritten',moment.legenda));section.append(copy);$('#moments').append(section);
   });
   const final=content.moments.find(m=>m.id===8);
